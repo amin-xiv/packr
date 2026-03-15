@@ -4,6 +4,6 @@ project(packr)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(packr src/main.c)
+add_executable(packr src/main.c src/entry.c src/ops.c src/utils.c)
 
 target_include_directories(packr PRIVATE include/)

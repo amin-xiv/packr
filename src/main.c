@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <packr/types.h>
-#include <packr/ops.h>
 #include <packr/utils.h>
+#include <packr/ops.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <string.h>
 #include <malloc.h>
 
 static void print_help();
