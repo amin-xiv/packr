@@ -8,7 +8,7 @@
 #include <string.h>
 #include <malloc.h>
 
-void print_help();
+static void print_help();
 
 int main(int argc, char** argv) {
     char cur_opt;
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void print_help() {
+static void print_help() {
     printf("Usage:\n -p: pack a directory\n -u: unpack a .packr file\n -s: neglect metadata\n -l: path to directory\n "
            "-h: help\n");
 }

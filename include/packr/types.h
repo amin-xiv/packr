@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <packr/entry.h>
+#include <packr/types.h>
 
 
 typedef int8_t i8;
