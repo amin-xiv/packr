@@ -42,8 +42,6 @@ struct dir_data* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
 
     while((entry = readdir(dir)) != NULL) {
         if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
-            data_ptr->total_dir_count++;
-            data_ptr->total_entry_count++;
             continue;
         }
 
