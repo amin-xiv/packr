@@ -8,7 +8,7 @@ BreakBeforeBraces: Attach
 
 AllowShortFunctionsOnASingleLine: None
 
-AllowShortIfStatementsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
 
 AllowShortLoopsOnASingleLine: false
 

@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <packr/types.h>
+#include <packr/ops.h>
+#include <packr/utils.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <string.h>
+#include <malloc.h>
 
 void print_help();
 
@@ -10,6 +16,7 @@ int main(int argc, char** argv) {
     bool op_provided = FALSE; // Whether a -p or -u option was provided
     bool no_metadata = FALSE;
     bool path_provided = FALSE;
+    bool path_absolute = FALSE;
 
     while((cur_opt = getopt(argc, argv, "pushl:")) != -1) {
         switch(cur_opt) {
@@ -31,6 +38,7 @@ int main(int argc, char** argv) {
 
         case 'l':
             path_provided = TRUE;
+            src_path = optarg;
             break;
 
 
@@ -46,6 +54,40 @@ int main(int argc, char** argv) {
         print_help();
         return 1;
     }
+
+
+    pack_header* header; // Pack header
+    DIR* dir = NULL;     // pointer to target directory stream
+
+    if(*src_path == '/') {
+        path_absolute = TRUE;
+        dir = opendir(src_path);
+    } else {
+        char* cwd = getcwd(NULL, 0);
+        src_path = join_to_path(src_path, cwd);
+        free(cwd);
+        printf("target: %s\n", src_path);
+    }
+
+    dir = opendir(src_path);
+    if(dir == NULL) {
+        perror("Can't access directory");
+        if(!path_absolute) free(src_path);
+        return 1;
+    } else {
+        printf("Directory found!\n");
+    }
+
+
+    u64 dir_size = get_dir_size(dir, src_path);
+    printf("dir size is: %lu\n", dir_size);
+
+
+    // Cleanup
+    if(!path_absolute) {
+        free(src_path);
+    }
+    closedir(dir);
 
     return 0;
 }

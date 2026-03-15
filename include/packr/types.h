@@ -1,3 +1,4 @@
+#pragma once
 #include <stdint.h>
 #include <packr/entry.h>
 
@@ -13,10 +14,12 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 
 
+typedef struct pack_header pack_header;
 typedef struct file_entry file_entry;
 typedef struct dir_entry dir_entry;
 
 
+// Yes I will NOT be passing 1s and 0s like a C developer...
 typedef enum {
     FALSE = 0,
     TRUE = 1,
