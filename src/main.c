@@ -2,6 +2,7 @@
 #include <getopt.h>
 #include <packr/types.h>
 #include <packr/utils.h>
+#include <packr/entry.h>
 #include <packr/ops.h>
 #include <dirent.h>
 #include <unistd.h>
@@ -55,12 +56,16 @@ int main(int argc, char** argv) {
     }
 
 
-    pack_header* header; // Pack header
-    DIR* dir = NULL;     // pointer to target directory stream
+    pack_header* header = pack_header_init(); // Pack header
+    if(!header) {
+        printf("failed to intialize pack header\n");
+        return 1;
+    }
+
+    DIR* dir = NULL; // pointer to target directory stream
 
     if(*src_path == '/') {
         path_absolute = TRUE;
-        dir = opendir(src_path);
     } else {
         char* cwd = getcwd(NULL, 0);
         src_path = join_to_path(src_path, cwd);
@@ -78,8 +83,17 @@ int main(int argc, char** argv) {
     }
 
 
-    u64 dir_size = get_dir_size(dir, src_path);
-    printf("dir size is: %lu\n", dir_size);
+    struct dir_data* data = get_dir_data(dir, src_path, DEFAULT_ROOT_DIR);
+    header->total_size = data->total_size;
+    printf("dir size is: %lu\n", data->total_size);
+
+    printf("total_dir_count: %lu\n", data->total_dir_count);
+    printf("total_file_count: %lu\n", data->total_file_count);
+    printf("total_entry_count: %lu\n", data->total_entry_count);
+
+    printf("child_dir_count: %lu\n", data->child_dir_count);
+    printf("child_file_count: %lu\n", data->child_file_count);
+    printf("child_entry_count: %lu\n", data->child_entry_count);
 
 
     // Cleanup
@@ -87,6 +101,9 @@ int main(int argc, char** argv) {
         free(src_path);
     }
     closedir(dir);
+    free(header);
+    free(data);
+
 
     return 0;
 }
