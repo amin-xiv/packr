@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <getopt.h>
 #include <packr/types.h>
 #include <packr/utils.h>
@@ -7,18 +8,20 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <malloc.h>
+#include <stddef.h>
 
 static void print_help();
 
 int main(int argc, char** argv) {
     char cur_opt;
-    char* src_path;
+    char* src_path = NULL;
+    char* named_as = NULL;
     bool op_provided = FALSE; // Whether a -p or -u option was provided
     bool no_metadata = FALSE;
     bool path_provided = FALSE;
     bool path_absolute = FALSE;
 
-    while((cur_opt = getopt(argc, argv, "pushl:")) != -1) {
+    while((cur_opt = getopt(argc, argv, "pushl:a:")) != -1) {
         switch(cur_opt) {
         case 'p':
             op_provided = TRUE;
@@ -46,6 +49,14 @@ int main(int argc, char** argv) {
             print_help();
             return 0;
             break;
+
+        case 'a':
+            named_as = optarg;
+            break;
+
+        case '?':
+            print_help();
+            return 1;
         }
     }
 
@@ -56,11 +67,7 @@ int main(int argc, char** argv) {
     }
 
 
-    pack_header* header = pack_header_init(); // Pack header
-    if(!header) {
-        printf("failed to intialize pack header\n");
-        return 1;
-    }
+
 
     DIR* dir = NULL; // pointer to target directory stream
 
@@ -83,9 +90,24 @@ int main(int argc, char** argv) {
     }
 
 
-    struct dir_data* data = get_dir_data(dir, src_path, DEFAULT_ROOT_DIR);
-    header->total_size = data->total_size;
+    pack_header* data = get_dir_data(dir, src_path, DEFAULT_ROOT_DIR);
+    if(named_as) {
+        memcpy(data->dirname, named_as, strlen(named_as) + 1); // +1 for the \0
+        data->dirname_length = strlen(named_as);
+    } else {
+        i16 slash_last_instance = 0;
+        for(size_t i = 0; i < strlen(src_path); i++) {
+            if(src_path[i] == '/') {
+                slash_last_instance = i;
+            }
+        }
+        char* target_name = src_path + slash_last_instance + 1;      // +1 to skip the last '/'
+        memcpy(data->dirname, target_name, strlen(target_name) + 1); // +1 to include the \0
+        data->dirname_length = strlen(data->dirname);
+    }
     printf("dir size is: %lu\n", data->total_size);
+    printf("dir name: %s\n", data->dirname);
+    printf("dir name length: %u\n", data->dirname_length);
 
     printf("total_dir_count: %lu\n", data->total_dir_count);
     printf("total_file_count: %lu\n", data->total_file_count);
@@ -95,13 +117,16 @@ int main(int argc, char** argv) {
     printf("child_file_count: %lu\n", data->child_file_count);
     printf("child_entry_count: %lu\n", data->child_entry_count);
 
+    printf("last access time: %lu\n", data->acc_time);
+    printf("last modification time: %lu\n", data->mod_time);
+    printf("last status change time: %lu\n", data->sc_time);
+    printf("mode: %d\n", data->mode);
 
     // Cleanup
     if(!path_absolute) {
         free(src_path);
     }
     closedir(dir);
-    free(header);
     free(data);
 
 

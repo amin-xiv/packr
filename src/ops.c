@@ -10,21 +10,12 @@
 #include <sys/stat.h>
 #include <string.h>
 
-struct dir_data* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
-    struct dir_data* data_ptr = malloc(sizeof(struct dir_data));
-    struct dir_data data_temp = {
-        .child_entry_count = 0,
-        .child_file_count = 0,
-        .child_dir_count = 0,
-        .total_entry_count = 0,
-        .total_dir_count = 0,
-        .total_file_count = 0,
-        .acc_time = 0,
-        .mod_time = 0,
-        .sc_time = 0,
-        .dirname_length = 0,
-        .mode = 0,
-    };
+pack_header* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
+    pack_header* data_ptr = pack_header_init();
+    if(!data_ptr) {
+        return NULL;
+    }
+
     data_ptr->child_entry_count = 0;
     data_ptr->child_file_count = 0;
     data_ptr->child_dir_count = 0;
@@ -34,8 +25,6 @@ struct dir_data* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
     data_ptr->total_entry_count = 0;
 
     data_ptr->total_size = 0;
-
-    data_ptr->dirname_length = strlen(dir_str);
 
     struct dirent* entry;
     struct stat ent_stat;
@@ -62,7 +51,7 @@ struct dir_data* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
                 return NULL;
             }
 
-            struct dir_data* data_inner = get_dir_data(dir_inner, full_path, nest_count + 1);
+            pack_header* data_inner = get_dir_data(dir_inner, full_path, nest_count + 1);
             data_ptr->total_size += data_inner->total_size;
             data_ptr->total_entry_count++;
             data_ptr->total_dir_count++;
@@ -93,6 +82,19 @@ struct dir_data* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
         }
 
         free(full_path);
+    }
+
+    // get timestamps and mode
+    if(!nest_count) {
+        struct stat root_stat;
+        if(lstat(dir_str, &root_stat) == -1) {
+            return NULL;
+        }
+
+        data_ptr->acc_time = root_stat.st_atim.tv_sec + NSEC_TO_SEC(root_stat.st_atim.tv_nsec);
+        data_ptr->mod_time = root_stat.st_mtim.tv_sec + NSEC_TO_SEC(root_stat.st_mtim.tv_nsec);
+        data_ptr->sc_time = root_stat.st_ctim.tv_sec + NSEC_TO_SEC(root_stat.st_ctim.tv_nsec);
+        data_ptr->mode = root_stat.st_mode;
     }
 
     return data_ptr;

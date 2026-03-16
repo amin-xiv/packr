@@ -1,5 +1,6 @@
 #include <packr/types.h>
 #include <packr/entry.h>
+#include <packr/ops.h>
 #include <malloc.h>
 
 pack_header* pack_header_init() {
