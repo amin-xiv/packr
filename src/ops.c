@@ -52,6 +52,11 @@ pack_header* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
             }
 
             pack_header* data_inner = get_dir_data(dir_inner, full_path, nest_count + 1);
+
+            if(!data_inner) {
+                return NULL;
+            }
+
             data_ptr->total_size += data_inner->total_size;
             data_ptr->total_entry_count++;
             data_ptr->total_dir_count++;
@@ -67,7 +72,7 @@ pack_header* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
                 data_ptr->child_dir_count++;
             }
 
-            free(dir_inner);
+            closedir(dir_inner);
             free(data_inner);
         } else {
             data_ptr->total_size += ent_stat.st_size;

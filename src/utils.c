@@ -6,6 +6,11 @@
 
 
 char* join_to_path(char* filename, char* cwd) {
+    if(!filename || !cwd) {
+        return NULL;
+    }
+
+
     char* temp = malloc(strlen(filename) + strlen(cwd) + 2); // +1 to for the extra '/', +1 for the null terminator
     strncpy(temp, cwd, strlen(cwd) + 1);                     // +1 to copy the null terminator
     size_t curr_temp_len = strlen(temp); // Needed due to overwriting and rewriting the null terminator

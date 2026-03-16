@@ -6,6 +6,11 @@ set(CMAKE_C_STANDARD 17)
 
 add_executable(packr src/main.c src/entry.c src/ops.c src/utils.c)
 target_include_directories(packr PRIVATE include/)
+target_compile_options(packr PRIVATE 
+					$<$<CONFIG:Debug>: -g -O0>	
+					$<$<CONFIG:Release>: -O2>	
+
+)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -16,7 +21,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(tests ./tests/basic.cpp)
+add_executable(tests ./tests/basic.cpp ./src/utils.c)
 include(GoogleTest)
 target_link_libraries(tests GTest::gtest_main)
+target_include_directories(tests PRIVATE include/)
 gtest_discover_tests(tests)
