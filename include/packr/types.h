@@ -14,7 +14,7 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 
 
-typedef struct pack_header pack_header;
+typedef struct dir_entry pack_header;
 typedef struct file_entry file_entry;
 typedef struct dir_entry dir_entry;
 

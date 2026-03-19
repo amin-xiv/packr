@@ -1,10 +1,11 @@
-#include <stdio.h>
-#include <string.h>
-#include <getopt.h>
 #include <packr/types.h>
 #include <packr/utils.h>
 #include <packr/entry.h>
 #include <packr/ops.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <getopt.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <malloc.h>
@@ -86,14 +87,14 @@ int main(int argc, char** argv) {
         if(!path_absolute) free(src_path);
         return 1;
     } else {
-        printf("Directory found!\n");
+        printf("Source directory found!\n");
     }
 
 
-    pack_header* data = get_dir_data(dir, src_path, DEFAULT_ROOT_DIR);
+    pack_header* dir_data = get_dir_data(dir, src_path, DEFAULT_ROOT_DIR);
     if(named_as) {
-        memcpy(data->dirname, named_as, strlen(named_as) + 1); // +1 for the \0
-        data->dirname_length = strlen(named_as);
+        memcpy(dir_data->dirname, named_as, strlen(named_as) + 1); // +1 for the \0
+        dir_data->dirname_length = strlen(named_as);
     } else {
         i16 slash_last_instance = 0;
         for(size_t i = 0; i < strlen(src_path); i++) {
@@ -101,34 +102,70 @@ int main(int argc, char** argv) {
                 slash_last_instance = i;
             }
         }
-        char* target_name = src_path + slash_last_instance + 1;      // +1 to skip the last '/'
-        memcpy(data->dirname, target_name, strlen(target_name) + 1); // +1 to include the \0
-        data->dirname_length = strlen(data->dirname);
+        char* target_name = src_path + slash_last_instance + 1;          // +1 to skip the last '/'
+        memcpy(dir_data->dirname, target_name, strlen(target_name) + 1); // +1 to include the \0
+        dir_data->dirname_length = strlen(dir_data->dirname);
     }
-    printf("dir size is: %lu\n", data->total_size);
-    printf("dir name: %s\n", data->dirname);
-    printf("dir name length: %u\n", data->dirname_length);
+    printf("dir size is: %lu\n", dir_data->size);
+    printf("dir name: %s\n", dir_data->dirname);
+    printf("dir name length: %u\n", dir_data->dirname_length);
 
-    printf("total_dir_count: %lu\n", data->total_dir_count);
-    printf("total_file_count: %lu\n", data->total_file_count);
-    printf("total_entry_count: %lu\n", data->total_entry_count);
+    printf("total_dir_count: %lu\n", dir_data->total_dir_count);
+    printf("total_file_count: %lu\n", dir_data->total_file_count);
+    printf("total_entry_count: %lu\n", dir_data->total_entry_count);
 
-    printf("child_dir_count: %lu\n", data->child_dir_count);
-    printf("child_file_count: %lu\n", data->child_file_count);
-    printf("child_entry_count: %lu\n", data->child_entry_count);
+    printf("child_dir_count: %lu\n", dir_data->child_dir_count);
+    printf("child_file_count: %lu\n", dir_data->child_file_count);
+    printf("child_entry_count: %lu\n", dir_data->child_entry_count);
 
-    printf("last access time: %lu\n", data->acc_time);
-    printf("last modification time: %lu\n", data->mod_time);
-    printf("last status change time: %lu\n", data->sc_time);
-    printf("mode: %d\n", data->mode);
+    printf("last access time: %lu\n", dir_data->acc_time);
+    printf("last modification time: %lu\n", dir_data->mod_time);
+    printf("last status change time: %lu\n", dir_data->sc_time);
+    printf("mode: %d\n", dir_data->mode);
+
+    const char* extension = ".packr";
+    char* pack_file_str = malloc(strlen(extension) + strlen(dir_data->dirname) + 1); // +1 for the \0
+    if(!pack_file_str) {
+        free(pack_file_str);
+        perror("malloc()");
+        return 1;
+    }
+    strcpy(pack_file_str, dir_data->dirname);
+    strcat(pack_file_str, extension);
+
+    FILE* pack_file_stream = fopen(pack_file_str, "w+");
+    if(!pack_file_stream) {
+        if(!path_absolute) {
+            free(src_path);
+        }
+        closedir(dir);
+        free(dir_data);
+        perror("fdopen()");
+        free(pack_file_str);
+        return 1;
+    }
+
+
+    if(pack(dir_data, src_path, dir, pack_file_stream, DEFAULT_ROOT_DIR) != 0) {
+        perror("pack()");
+        if(!path_absolute) {
+            free(src_path);
+        }
+        free(pack_file_str);
+        closedir(dir);
+        free(dir_data);
+        fclose(pack_file_stream);
+        return 1;
+    }
 
     // Cleanup
     if(!path_absolute) {
         free(src_path);
     }
     closedir(dir);
-    free(data);
-
+    free(dir_data);
+    free(pack_file_str);
+    fclose(pack_file_stream);
 
     return 0;
 }
