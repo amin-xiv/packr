@@ -89,6 +89,7 @@ int main(int argc, char** argv) {
 
 
     pack_header* dir_data = get_dir_data(dir, src_path, DEFAULT_ROOT_DIR);
+    if(named_as) add_dirname(dir_data, named_as, src_path);
 
     printf("dir size is: %lu\n", dir_data->size);
     printf("dir name: %s\n", dir_data->dirname);

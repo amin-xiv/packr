@@ -1,9 +1,9 @@
-#include <dirent.h>
 #include <packr/types.h>
 #include <packr/entry.h>
 #include <stdio.h>
 #include <fcntl.h>
-
+#include <stdlib.h>
+#include <dirent.h>
 
 int main(void) {
     const char* pack_path = "../../build/state.packr";
@@ -114,7 +114,7 @@ int main(void) {
                 printf("mode: %o\n", curr_file_data.mode);
                 printf("contents: \n");
                 printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-                char read_buff[curr_file_data.size];
+                char* read_buff = malloc(curr_file_data.size);
                 if(fread(&read_buff, 1, curr_file_data.size, file_stream) != curr_file_data.size) {
                     fprintf(stderr, "Error while reading file contents..\n");
                     return 1;
