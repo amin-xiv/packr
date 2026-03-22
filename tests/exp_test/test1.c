@@ -6,23 +6,28 @@
 
 
 int main(void) {
-    const char* pack_path = "/mnt/data/Data/Systems_Programming/practice_projects/packr/build/directorname.packr";
+    const char* pack_path = "../../../build/directorname.packr";
     FILE* file_stream = fopen(pack_path, "rb");
     if(!file_stream) {
         perror("fopen()");
         return 1;
     }
-
+    // PACK_START
     special_marker pack_start_marker;
     if(fread(&pack_start_marker, sizeof(special_marker), 1, file_stream) < 1) {
         fprintf(stderr, "error while pack start marker!\n");
         return 1;
     }
+    printf("current file marker is %s",
+           pack_start_marker.type == PACK_START ? "INDEED PACK_START\n" : "NOT PACK_START\n");
 
+    // PACK_HEADER
     dir_entry curr_dir_data;
     if(fread(&curr_dir_data, sizeof(dir_entry), 1, file_stream) < 1) {
         fprintf(stderr, "error while reading pack header\n");
+        return 1;
     }
+
     printf("==========================\n");
     printf("==========================\n");
     printf("dirname: %s\n", curr_dir_data.dirname);
@@ -37,11 +42,19 @@ int main(void) {
     printf("last access time: %lu\n", curr_dir_data.acc_time);
     printf("last modification time: %lu\n", curr_dir_data.mod_time);
     printf("last status change time: %lu\n", curr_dir_data.sc_time);
-    printf("mode: %d\n", curr_dir_data.mode);
+    printf("mode: %o\n", curr_dir_data.mode);
     printf("==========================\n");
     printf("==========================\n");
 
-    u32 run_count = 0;
+    // Initial ENT_DIR_START marker
+    special_marker pack_header_start_marker;
+    if(fread(&pack_header_start_marker, sizeof(special_marker), 1, file_stream) < 1) {
+        fprintf(stderr, "error while pack header start marker!\n");
+        return 1;
+    }
+    printf("pack start header is %s",
+           pack_header_start_marker.type == ENT_DIR_START ? "INDEED ENT_DIR_START\n" : "NOT ENT_DIR_START\n");
+
     while(TRUE) {
         special_marker curr_marker;
         if(fread(&curr_marker, sizeof(special_marker), 1, file_stream) < 1) {
@@ -56,15 +69,13 @@ int main(void) {
             return 1;
             break;
         case ENT_DIR_START:
-            if(!run_count) {
-                continue;
-            }
             printf("==========================\n");
             printf("ENT_DIR_START..\n");
             {
                 dir_entry curr_dir_data;
                 if(fread(&curr_dir_data, sizeof(dir_entry), 1, file_stream) < 1) {
                     fprintf(stderr, "error while reading a directory entry from file stream\n");
+                    return 1;
                 }
                 printf("dirname: %s\n", curr_dir_data.dirname);
                 printf("dirname length: %d\n", curr_dir_data.dirname_length);
@@ -78,7 +89,7 @@ int main(void) {
                 printf("last access time: %lu\n", curr_dir_data.acc_time);
                 printf("last modification time: %lu\n", curr_dir_data.mod_time);
                 printf("last status change time: %lu\n", curr_dir_data.sc_time);
-                printf("mode: %d\n", curr_dir_data.mode);
+                printf("mode: %o\n", curr_dir_data.mode);
             }
             break;
         case ENT_DIR_END:
@@ -100,6 +111,7 @@ int main(void) {
                 printf("last access time: %lu\n", curr_file_data.acc_time);
                 printf("last modification time: %lu\n", curr_file_data.mod_time);
                 printf("last status change time: %lu\n", curr_file_data.sc_time);
+                printf("mode: %o\n", curr_file_data.mode);
                 printf("contents: \n");
                 printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 char read_buff[curr_file_data.size];
@@ -115,7 +127,6 @@ int main(void) {
             fprintf(stderr, "Fatal: Unknown marker!\n");
             return 1;
         }
-        run_count++;
     }
     return 0;
 }
