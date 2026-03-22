@@ -27,6 +27,7 @@ pack_header* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
     data_ptr->total_entry_count = 0;
     data_ptr->entry_class = (nest_count - 1) == 0 ? CHILD_ENT : NESTED_ENT;
     data_ptr->size = 0;
+    add_dirname(data_ptr, NULL, dir_str);
 
     struct dirent* entry;
     struct stat ent_stat;
@@ -113,7 +114,9 @@ pack_header* get_dir_data(DIR* dir, char* dir_str, u32 nest_count) {
 
 file_entry* get_file_data(char* filename, u32 nest_count) {
     file_entry* data = malloc(sizeof(file_entry));
-    memset(data->filename, 0, NAME_LEN_MAX);
+    if(!data) return NULL;
+
+    memset(data, '\0', sizeof(file_entry));
     data->size = 0;
     data->acc_time = 0;
     data->mod_time = 0;
@@ -129,7 +132,7 @@ file_entry* get_file_data(char* filename, u32 nest_count) {
 
     strcpy(data->filename, filename);
     data->size = file_stat.st_size;
-    data->filename_length = strlen(filename + 1); // +1 to count the \0
+    data->filename_length = strlen(filename); // +1 to count the \0
     data->acc_time = file_stat.st_atim.tv_sec + NSEC_TO_SEC(file_stat.st_atim.tv_nsec);
     data->mod_time = file_stat.st_mtim.tv_sec + NSEC_TO_SEC(file_stat.st_mtim.tv_nsec);
     data->sc_time = file_stat.st_ctim.tv_sec + NSEC_TO_SEC(file_stat.st_ctim.tv_nsec);
@@ -139,7 +142,7 @@ file_entry* get_file_data(char* filename, u32 nest_count) {
 }
 
 i8 pack_dir(dir_entry* dir_header, char* dir_path, FILE* pack_file, u8 opts, u32 nest_count) {
-    bool no_metadata = (opts & P_NOMETADATA) != 0;
+    Bool no_metadata = (opts & P_NOMETADATA) != 0;
     dir_entry dir_header_copy = *dir_header;
 
     DIR* dir = opendir(dir_path);
@@ -244,34 +247,43 @@ i8 pack_dir(dir_entry* dir_header, char* dir_path, FILE* pack_file, u8 opts, u32
                 return 1;
             }
 
-            FILE* file_stream = fopen(full_path, "r");
-            if(!file_stream) {
-                free(full_path);
-                closedir(dir);
-                free(file_data);
-                return 1;
-            }
+            // check if file has actually some data and size != 0 before writing file contents
+            if(file_data->size) {
+                FILE* file_stream = fopen(full_path, "r");
+                if(!file_stream) {
+                    free(full_path);
+                    closedir(dir);
+                    free(file_data);
+                    return 1;
+                }
 
-            char read_buff[file_data->size];
-            if(fread(read_buff, file_data->size, 1, file_stream) < 1) {
-                free(full_path);
-                closedir(dir);
-                fclose(file_stream);
-                free(file_data);
-                return 1;
-            }
+                // if the file has actual contents and not empty
+                char* read_buff = malloc(file_data->size);
+                memset(read_buff, '\0', file_data->size);
+                if(!read_buff)
+                    if(fread(read_buff, file_data->size, 1, file_stream) < 1) {
+                        free(full_path);
+                        closedir(dir);
+                        fclose(file_stream);
+                        free(file_data);
+                        return 1;
+                    }
 
-            if(fwrite(read_buff, file_data->size, 1, pack_file) < 1) {
-                free(full_path);
-                closedir(dir);
+                if(fwrite(read_buff, file_data->size, 1, pack_file) < 1) {
+                    free(full_path);
+                    closedir(dir);
+                    fclose(file_stream);
+                    free(file_data);
+                    free(read_buff);
+                    return 1;
+                }
+
+                free(read_buff);
                 fclose(file_stream);
-                free(file_data);
-                return 1;
             }
 
             free(file_data);
             free(full_path);
-            fclose(file_stream);
             sync(); // to ensure data is actually residing on the file before next iteration
 
             dir_header_copy.total_file_count--;

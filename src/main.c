@@ -17,10 +17,10 @@ int main(int argc, char** argv) {
     char cur_opt;
     char* src_path = NULL;
     char* named_as = NULL;
-    bool op_provided = FALSE; // Whether a -p or -u option was provided
-    bool no_metadata = FALSE;
-    bool path_provided = FALSE;
-    bool path_absolute = FALSE;
+    Bool op_provided = FALSE; // Whether a -p or -u option was provided
+    Bool no_metadata = FALSE;
+    Bool path_provided = FALSE;
+    Bool path_absolute = FALSE;
 
     while((cur_opt = getopt(argc, argv, "pushl:a:")) != -1) {
         switch(cur_opt) {
@@ -67,9 +67,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-
-
-
     DIR* dir = NULL; // pointer to target directory stream
 
     if(*src_path == '/') {
@@ -92,20 +89,7 @@ int main(int argc, char** argv) {
 
 
     pack_header* dir_data = get_dir_data(dir, src_path, DEFAULT_ROOT_DIR);
-    if(named_as) {
-        memcpy(dir_data->dirname, named_as, strlen(named_as) + 1); // +1 for the \0
-        dir_data->dirname_length = strlen(named_as);
-    } else {
-        i16 slash_last_instance = 0;
-        for(size_t i = 0; i < strlen(src_path); i++) {
-            if(src_path[i] == '/') {
-                slash_last_instance = i;
-            }
-        }
-        char* target_name = src_path + slash_last_instance + 1;          // +1 to skip the last '/'
-        memcpy(dir_data->dirname, target_name, strlen(target_name) + 1); // +1 to include the \0
-        dir_data->dirname_length = strlen(dir_data->dirname);
-    }
+
     printf("dir size is: %lu\n", dir_data->size);
     printf("dir name: %s\n", dir_data->dirname);
     printf("dir name length: %u\n", dir_data->dirname_length);

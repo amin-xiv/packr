@@ -23,4 +23,4 @@ typedef struct dir_entry dir_entry;
 typedef enum {
     FALSE = 0,
     TRUE = 1,
-} bool;
+} Bool;

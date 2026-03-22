@@ -6,7 +6,7 @@
 
 
 int main(void) {
-    const char* pack_path = "../../../build/directorname.packr";
+    const char* pack_path = "../../build/state.packr";
     FILE* file_stream = fopen(pack_path, "rb");
     if(!file_stream) {
         perror("fopen()");
