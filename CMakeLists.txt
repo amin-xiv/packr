@@ -21,8 +21,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(tests ./tests/basic.cpp ./src/utils.c)
+add_executable(tests ./tests/main.cpp ./src/utils.c ./src/entry.c)
 include(GoogleTest)
-target_link_libraries(tests GTest::gtest_main)
+target_link_libraries(tests PRIVATE GTest::gtest_main)
 target_include_directories(tests PRIVATE include/)
 gtest_discover_tests(tests)
