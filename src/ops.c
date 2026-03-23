@@ -224,6 +224,10 @@ i8 pack_dir(dir_entry* dir_header, char* dir_path, FILE* pack_file, u8 opts, u32
             closedir(dir_inner);
             free(dir_data_inner);
 
+        } else if(S_ISLNK(ent_stat.st_mode)) {
+            // i don't wanna handle any symlinks rn
+            free(full_path);
+            continue;
         } else {
             file_entry* file_data = get_file_data(full_path, nest_count + 1);
             if(!file_data) {
