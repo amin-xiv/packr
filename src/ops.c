@@ -260,7 +260,7 @@ i8 pack_dir(dir_entry* dir_header, char* dir_path, FILE* pack_file, u8 opts, u32
                 // if the file has actual contents and not empty
                 char* read_buff = malloc(file_data->size);
                 memset(read_buff, '\0', file_data->size);
-                if(!read_buff)
+                if(read_buff)
                     if(fread(read_buff, file_data->size, 1, file_stream) < 1) {
                         free(full_path);
                         closedir(dir);

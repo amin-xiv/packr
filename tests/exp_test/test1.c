@@ -6,7 +6,7 @@
 #include <dirent.h>
 
 int main(void) {
-    const char* pack_path = "../../build/state.packr";
+    const char* pack_path = "../../build/directorname.packr";
     FILE* file_stream = fopen(pack_path, "rb");
     if(!file_stream) {
         perror("fopen()");
@@ -115,7 +115,7 @@ int main(void) {
                 printf("contents: \n");
                 printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
                 char* read_buff = malloc(curr_file_data.size);
-                if(fread(&read_buff, 1, curr_file_data.size, file_stream) != curr_file_data.size) {
+                if(fread(read_buff, 1, curr_file_data.size, file_stream) != curr_file_data.size) {
                     fprintf(stderr, "Error while reading file contents..\n");
                     return 1;
                 }
