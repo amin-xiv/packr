@@ -2,6 +2,8 @@ BasedOnStyle: LLVM
 
 IndentWidth: 4
 
+IndentCaseBlocks: true
+
 UseTab: Never
 
 BreakBeforeBraces: Attach
