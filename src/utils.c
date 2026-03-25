@@ -5,12 +5,10 @@
 #include <malloc.h>
 #include <string.h>
 
-
 char* join_to_path(char* filename, char* cwd) {
     if(!filename || !cwd) {
         return NULL;
     }
-
 
     char* temp = malloc(strlen(filename) + strlen(cwd) + 2); // +1 to for the extra '/', +1 for the null terminator
     strncpy(temp, cwd, strlen(cwd) + 1);                     // +1 to copy the null terminator
@@ -42,4 +40,20 @@ void add_dirname(dir_entry* dir_ent, char* named_as, char* src_path) {
         memcpy(dir_ent->dirname, target_name, strlen(target_name) + 1);                     // +1 to include the \0
         dir_ent->dirname_length = strlen(dir_ent->dirname);
     }
+}
+
+char* extract_filename(char* path) {
+    if(!path) {
+        return NULL;
+    }
+
+    i16 slash_last_instance = 0;
+    for(size_t i = 0; i < strlen(path); i++) {
+        if(path[i] == '/') {
+            slash_last_instance = i;
+        }
+    }
+
+    char* filename = path + slash_last_instance + (slash_last_instance ? 1 : 0); // +1 to skip the last '/'
+    return filename;
 }

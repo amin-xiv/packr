@@ -4,3 +4,4 @@
 
 char* join_to_path(char* filename, char* cwd);
 void add_dirname(dir_entry* dir_ent, char* named_as, char* src_path);
+char* extract_filename(char* path);

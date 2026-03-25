@@ -32,8 +32,8 @@ TEST(join_to_path, normal) {
 }
 
 TEST(join_to_path, null_inputs) {
-    char* path = nullptr;
-    char* filename = nullptr;
+    char* path{nullptr};
+    char* filename{nullptr};
     EXPECT_EQ(nullptr, join_to_path(filename, path));
 }
 
@@ -74,4 +74,17 @@ TEST(other_macros_and_constants, main_tests) {
     EXPECT_EQ(False, 0);
     EXPECT_EQ(DEFAULT_ROOT_DIR, 0);
     EXPECT_EQ(P_NOMETADATA, 0B00000001);
+}
+
+TEST(extract_filename, normal) {
+    std::string path{"/bla/bla/home/desktop/bla/textfile.txt67"};
+    std::string filename{"textfile.txt67"};
+    std::string actual_filename{extract_filename(path.data())};
+    EXPECT_EQ(filename, actual_filename);
+}
+
+TEST(extract_filename, null_input) {
+    char* path{nullptr};
+    char* actual_filename{extract_filename(path)};
+    EXPECT_EQ(nullptr, actual_filename);
 }
