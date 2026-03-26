@@ -1,3 +1,8 @@
+/*
+ * This test file is to test whether a .packr files is valid or no,
+ * by outputting its contetns in string representation
+ */
+
 #include <packr/types.h>
 #include <packr/entry.h>
 #include <stdio.h>
