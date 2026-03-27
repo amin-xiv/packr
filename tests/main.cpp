@@ -67,7 +67,6 @@ TEST(special_markers, main_test) {
 
 // Testing other macros and constant values
 TEST(other_macros_and_constants, main_tests) {
-    EXPECT_EQ(NAME_LEN_MAX, 4096);
     Bool True{TRUE};
     EXPECT_EQ(True, 1);
     Bool False{FALSE};

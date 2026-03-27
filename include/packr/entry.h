@@ -1,10 +1,9 @@
 #pragma once
 
+#include <limits.h>
 #include <stdint.h>
 #include <packr/types.h>
 #include <packr/ops.h>
-
-#define NAME_LEN_MAX 4096
 
 #define ENT_DIR_START ((uint8_t)0x01)
 #define ENT_DIR_END ((uint8_t)0x02)
@@ -13,7 +12,7 @@
 #define PACK_END ((uint8_t)0x10) // 16
 
 struct file_entry {
-    char filename[NAME_LEN_MAX];
+    char filename[NAME_MAX];
     u64 size;     // file size
     u64 acc_time; // last access time
     u64 mod_time; // last modification time
@@ -24,7 +23,7 @@ struct file_entry {
 } __attribute__((packed));
 
 struct dir_entry {
-    char dirname[NAME_LEN_MAX];
+    char dirname[NAME_MAX];
     u64 child_entry_count;
     u64 child_file_count;
     u64 child_dir_count;
