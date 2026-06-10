@@ -372,15 +372,20 @@ i8 unpack_dir(FILE* pack_file, u8 opts, u32 nest_count) {
                 FILE* target_file = fopen(curr_file_data.filename, "w");
                 if(!target_file) return 1;
 
-                char* file_data_buff = malloc(curr_file_data.size);
-                if(!file_data_buff) return 1;
+                if(curr_file_data.size) {
+                    char* file_data_buff = malloc(curr_file_data.size);
 
-                if(fread(file_data_buff, curr_file_data.size, 1, pack_file) < 1) return 1;
+                    if(!file_data_buff) return 1;
 
-                if(fwrite(file_data_buff, curr_file_data.size, 1, target_file) < 1) return 1;
+                    if(fread(file_data_buff, curr_file_data.size, 1, pack_file) < 1) goto clean_up;
+
+                    if(fwrite(file_data_buff, curr_file_data.size, 1, target_file) < 1) goto clean_up;
+
+                clean_up:
+                    free(file_data_buff);
+                }
 
                 fclose(target_file);
-                free(file_data_buff);
             }
             break;
 
