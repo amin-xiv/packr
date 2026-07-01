@@ -2,16 +2,19 @@
 
 Simple directory archiver.
 
+### Note:
+This project is currently archived, and it's rewritten in C++(and to be extended) in [this](https://github.com/amin-xiv/packr-v2.git) repository.
+
 ## Description
 
-Given a directory, the tools packs it into a single ``.packr`` file, that can be unpacked using the same tool.
+Given a directory, the tool packs it into a single ``.packr`` file, that can be unpacked using the same tool.
 
 ## Getting Started
 
 ### Dependencies
 
-- GCC +V5
-- CMake v3.3+
+- GCC +V14
+- CMake v4.2.3+
 - Linux(since MacOS is unix-based it should *theoretically* work since this program is posix-compliant but I didn't put much care into this).
 
 ### Building
@@ -24,11 +27,11 @@ Given a directory, the tools packs it into a single ``.packr`` file, that can be
 ### Usage
  #### Packing
  ```
-./packr -p [directory name]
+./packr -p -; [directory name]
 ```
  #### Unpacking
  ```
- ./packr -u [.packr file]
+ ./packr -u -l [.packr file]
  ```
 
  #### Help
